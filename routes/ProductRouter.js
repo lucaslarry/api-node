@@ -76,8 +76,8 @@ const ENDPOINT = '/products';
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post(ENDPOINT, productController.createProduct);
-router.get(ENDPOINT, productController.getAllProducts);
+router.post('/', productController.createProduct);
+router.get('/', productController.getAllProducts);
 
 
 module.exports = router;

@@ -29,7 +29,7 @@ const options = {
     },
     servers: [
       {
-        url: process.env.CORS_ORIGIN,
+        url: process.env.CORS_ORIGI,
       },
     ],
   },
