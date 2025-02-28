@@ -12,10 +12,10 @@ const port = process.env.PORT || 3000;
 
 
 app.use(cors({
-  origin: '*', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  allowedHeaders: ['Content-Type', 'Authorization'] 
-}));
+    origin: process.env.CORS_ORIGIN || '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
 
 app.use(bodyParser.json());
 
@@ -29,7 +29,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
+        url: CORS_ORIGIN,
       },
     ],
   },
