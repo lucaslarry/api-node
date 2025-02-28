@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors'); 
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const productRouter = require('./routes/ProductRouter.js');
+const userRouter = require('./routes/userRouter.js');
 const db = require('./db/database.js');
 
 db.connect();
@@ -39,7 +39,7 @@ const options = {
 const specs = swaggerJsdoc(options);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-app.use('/products', productRouter);
+app.use('/users', userRouter);
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
