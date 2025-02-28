@@ -5,6 +5,13 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Usuários
+ *   description: Gerenciamento de usuários
+ */
+
+/**
+ * @swagger
  * components:
  *   schemas:
  *     User:
@@ -46,8 +53,10 @@ const router = express.Router();
 
 /**
  * @swagger
- * /:
+ * /users:
  *   post:
+ *     tags:
+ *       - Usuários
  *     summary: Cria um novo usuário
  *     description: Cria um novo usuário com nome, email e perfil.
  *     requestBody:
@@ -80,8 +89,10 @@ router.post('/', UserController.createUser);
 
 /**
  * @swagger
- * /:
+ * /users:
  *   get:
+ *     tags:
+ *       - Usuários
  *     summary: Lista todos os usuários
  *     description: Retorna uma lista de todos os usuários.
  *     responses:
@@ -100,8 +111,10 @@ router.get('/', UserController.getUsers);
 
 /**
  * @swagger
- * /{id}:
+ * /users/{id}:
  *   get:
+ *     tags:
+ *       - Usuários
  *     summary: Obtém um usuário por ID
  *     description: Retorna os detalhes de um usuário específico.
  *     parameters:
@@ -135,8 +148,10 @@ router.get('/:id', UserController.getUserById);
 
 /**
  * @swagger
- * /{id}:
+ * /users/{id}:
  *   put:
+ *     tags:
+ *       - Usuários
  *     summary: Atualiza um usuário
  *     description: Atualiza os dados de um usuário existente.
  *     parameters:
@@ -186,8 +201,10 @@ router.put('/:id', UserController.updateUser);
 
 /**
  * @swagger
- * /{id}:
+ * /users/{id}:
  *   delete:
+ *     tags:
+ *       - Usuários
  *     summary: Exclui um usuário
  *     description: Exclui um usuário existente.
  *     parameters:

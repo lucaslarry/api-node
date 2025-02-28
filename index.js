@@ -26,7 +26,12 @@ const options = {
       title: 'Minha API Node',
       version: '1.0.0',
       description: 'Documentação da minha API Node',
-    },
+    },tags: [
+      {
+        name: 'Usuários',
+        description: 'Operações relacionadas a usuários',
+      },
+    ],
     servers: [
       {
         url: process.env.CORS_ORIGI,
