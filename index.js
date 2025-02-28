@@ -3,7 +3,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors'); 
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
-const userRouter = require('./routes/userRouter.js');
+const userRouter = require('./routes/UserRouter');
 const db = require('./db/database.js');
 
 db.connect();
