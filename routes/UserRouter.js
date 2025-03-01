@@ -1,7 +1,43 @@
 const express = require('express');
 const UserController = require('../controllers/UserController.js');
+const Auth = require('../middlewares/auth');
 
 const router = express.Router();
+
+/**
+ * @swagger
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
+ *   schemas:
+ *     User:
+ *       type: object
+ *       required:
+ *         - name
+ *         - email
+ *         - password
+ *       properties:
+ *         name:
+ *           type: string
+ *           description: Nome do usuário.
+ *           example: "João Silva"
+ *         email:
+ *           type: string
+ *           description: Email do usuário (deve ser único e válido).
+ *           example: "joao.silva@example.com"
+ *         password:
+ *           type: string
+ *           description: Senha do usuário (mínimo 6 caracteres).
+ *           example: "senha123"
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: Data de criação do usuário.
+ *           example: "2023-09-01T12:00:00.000Z"
+ */
 
 /**
  * @swagger
@@ -12,40 +48,12 @@ const router = express.Router();
 
 /**
  * @swagger
- * components:
- *   schemas:
- *     User:
- *       type: object
- *       required:
- *         - name
- *         - email
- *       properties:
- *         name:
- *           type: string
- *           description: Nome do usuário (2-50 caracteres, apenas letras e espaços).
- *           example: "João Silva"
- *         email:
- *           type: string
- *           description: Email do usuário (deve ser único e válido).
- *           example: "joao.silva@example.com"
- *         bio:
- *           type: string
- *           description: Biografia do usuário (opcional, máximo 500 caracteres).
- *           example: "Amante de livros clássicos."
- *         profilePicture:
- *           type: string
- *           description: URL da foto de perfil (opcional).
- *           example: "https://example.com/profile.jpg"
- */
-
-/**
- * @swagger
  * /users:
  *   post:
  *     tags:
  *       - Usuários
  *     summary: Cria um novo usuário
- *     description: Cria um novo usuário com nome, email e, opcionalmente, biografia e foto de perfil. Um perfil é criado automaticamente.
+ *     description: Cria um novo usuário com nome, email e senha.
  *     requestBody:
  *       required: true
  *       content:
@@ -55,8 +63,7 @@ const router = express.Router();
  *           example:
  *             name: "João Silva"
  *             email: "joao.silva@example.com"
- *             bio: "Amante de livros clássicos."
- *             profilePicture: "https://example.com/profile.jpg"
+ *             password: "senha123"
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso.
@@ -64,6 +71,10 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *             example:
+ *               name: "João Silva"
+ *               email: "joao.silva@example.com"
+ *               created_at: "2023-09-01T12:00:00.000Z"
  *       400:
  *         description: Erro de validação ou email já em uso.
  *         content:
@@ -73,7 +84,7 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Nome deve conter apenas letras e espaços."
+ *                   example: "Email já está em uso."
  *       500:
  *         description: Erro interno no servidor.
  */
@@ -87,6 +98,8 @@ router.post('/', UserController.createUser);
  *       - Usuários
  *     summary: Lista todos os usuários
  *     description: Retorna uma lista de todos os usuários.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de usuários.
@@ -96,10 +109,17 @@ router.post('/', UserController.createUser);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *             example:
+ *               - name: "João Silva"
+ *                 email: "joao.silva@example.com"
+ *                 created_at: "2023-09-01T12:00:00.000Z"
+ *               - name: "Maria Oliveira"
+ *                 email: "maria.oliveira@example.com"
+ *                 created_at: "2023-09-01T12:30:00.000Z"
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/', UserController.getUsers);
+router.get('/', Auth, UserController.getUsers);
 
 /**
  * @swagger
@@ -109,6 +129,8 @@ router.get('/', UserController.getUsers);
  *       - Usuários
  *     summary: Obtém um usuário por ID
  *     description: Retorna os detalhes de um usuário específico.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -123,6 +145,10 @@ router.get('/', UserController.getUsers);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *             example:
+ *               name: "João Silva"
+ *               email: "joao.silva@example.com"
+ *               created_at: "2023-09-01T12:00:00.000Z"
  *       404:
  *         description: Usuário não encontrado.
  *         content:
@@ -136,7 +162,7 @@ router.get('/', UserController.getUsers);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/:id', UserController.getUserById);
+router.get('/:id', Auth, UserController.getUserById);
 
 /**
  * @swagger
@@ -146,6 +172,8 @@ router.get('/:id', UserController.getUserById);
  *       - Usuários
  *     summary: Atualiza um usuário
  *     description: Atualiza os dados de um usuário existente.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -162,8 +190,7 @@ router.get('/:id', UserController.getUserById);
  *           example:
  *             name: "João Silva"
  *             email: "joao.silva@example.com"
- *             bio: "Amante de livros clássicos."
- *             profilePicture: "https://example.com/profile.jpg"
+ *             password: "novaSenha123"
  *     responses:
  *       200:
  *         description: Usuário atualizado com sucesso.
@@ -171,6 +198,10 @@ router.get('/:id', UserController.getUserById);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/User'
+ *             example:
+ *               name: "João Silva"
+ *               email: "joao.silva@example.com"
+ *               created_at: "2023-09-01T12:00:00.000Z"
  *       400:
  *         description: Erro de validação ou email já em uso.
  *         content:
@@ -194,7 +225,7 @@ router.get('/:id', UserController.getUserById);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.put('/:id', UserController.updateUser);
+router.put('/:id', Auth, UserController.updateUser);
 
 /**
  * @swagger
@@ -204,6 +235,8 @@ router.put('/:id', UserController.updateUser);
  *       - Usuários
  *     summary: Exclui um usuário
  *     description: Exclui um usuário existente e seu perfil associado.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -227,6 +260,6 @@ router.put('/:id', UserController.updateUser);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.delete('/:id', UserController.deleteUser);
+router.delete('/:id', Auth, UserController.deleteUser);
 
 module.exports = router;

@@ -1,17 +1,16 @@
 const express = require('express');
 const bookController = require('../controllers/BookController');
+const Auth = require('../middlewares/auth');
 const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Livros
- *   description: Gerenciamento de livros
- */
-
-/**
- * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Book:
  *       type: object
@@ -22,11 +21,11 @@ const router = express.Router();
  *       properties:
  *         title:
  *           type: string
- *           description: Título do livro.
+ *           description: Título do livro (2 a 200 caracteres, apenas letras, números e caracteres especiais comuns).
  *           example: "Dom Quixote"
  *         author:
  *           type: string
- *           description: Autor do livro.
+ *           description: Autor do livro (2 a 100 caracteres, apenas letras e hífens).
  *           example: "Miguel de Cervantes"
  *         categories:
  *           type: array
@@ -46,12 +45,21 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Livros
+ *   description: Gerenciamento de livros
+ */
+
+/**
+ * @swagger
  * /books:
  *   post:
  *     tags:
  *       - Livros
  *     summary: Cria um novo livro
  *     description: Cria um novo livro com título, autor e categorias.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -69,6 +77,12 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Book'
+ *             example:
+ *               title: "Dom Quixote"
+ *               author: "Miguel de Cervantes"
+ *               categories: ["Ficção Científica", "Literatura Clássica"]
+ *               borrowedBy: null
+ *               isAvailable: true
  *       400:
  *         description: Erro de validação ou categoria não encontrada.
  *         content:
@@ -82,7 +96,7 @@ const router = express.Router();
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post('/', bookController.createBook);
+router.post('/', Auth, bookController.createBook);
 
 /**
  * @swagger
@@ -92,6 +106,8 @@ router.post('/', bookController.createBook);
  *       - Livros
  *     summary: Lista todos os livros
  *     description: Retorna uma lista de todos os livros.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de livros.
@@ -101,10 +117,21 @@ router.post('/', bookController.createBook);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Book'
+ *             example:
+ *               - title: "Dom Quixote"
+ *                 author: "Miguel de Cervantes"
+ *                 categories: ["Ficção Científica", "Literatura Clássica"]
+ *                 borrowedBy: null
+ *                 isAvailable: true
+ *               - title: "1984"
+ *                 author: "George Orwell"
+ *                 categories: ["Distopia", "Ficção Científica"]
+ *                 borrowedBy: "64f1b2c8e4b0f5a3d8e7f1a3"
+ *                 isAvailable: false
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/', bookController.getAllBooks);
+router.get('/', Auth, bookController.getAllBooks);
 
 /**
  * @swagger
@@ -114,6 +141,8 @@ router.get('/', bookController.getAllBooks);
  *       - Livros
  *     summary: Obtém um livro por ID
  *     description: Retorna os detalhes de um livro específico.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -128,6 +157,12 @@ router.get('/', bookController.getAllBooks);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Book'
+ *             example:
+ *               title: "Dom Quixote"
+ *               author: "Miguel de Cervantes"
+ *               categories: ["Ficção Científica", "Literatura Clássica"]
+ *               borrowedBy: null
+ *               isAvailable: true
  *       404:
  *         description: Livro não encontrado.
  *         content:
@@ -141,7 +176,7 @@ router.get('/', bookController.getAllBooks);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/:id', bookController.getBookById);
+router.get('/:id', Auth, bookController.getBookById);
 
 /**
  * @swagger
@@ -151,6 +186,8 @@ router.get('/:id', bookController.getBookById);
  *       - Livros
  *     summary: Atualiza um livro
  *     description: Atualiza os dados de um livro existente.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -175,6 +212,12 @@ router.get('/:id', bookController.getBookById);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Book'
+ *             example:
+ *               title: "Dom Quixote"
+ *               author: "Miguel de Cervantes"
+ *               categories: ["Ficção Científica", "Literatura Clássica"]
+ *               borrowedBy: null
+ *               isAvailable: true
  *       400:
  *         description: Erro de validação ou categoria não encontrada.
  *         content:
@@ -198,7 +241,7 @@ router.get('/:id', bookController.getBookById);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.put('/:id', bookController.updateBook);
+router.put('/:id', Auth, bookController.updateBook);
 
 /**
  * @swagger
@@ -208,6 +251,8 @@ router.put('/:id', bookController.updateBook);
  *       - Livros
  *     summary: Exclui um livro
  *     description: Exclui um livro existente.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -231,7 +276,7 @@ router.put('/:id', bookController.updateBook);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.delete('/:id', bookController.deleteBook);
+router.delete('/:id', Auth, bookController.deleteBook);
 
 /**
  * @swagger
@@ -241,6 +286,8 @@ router.delete('/:id', bookController.deleteBook);
  *       - Livros
  *     summary: Empresta um livro
  *     description: Empresta um livro para um usuário.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -266,6 +313,12 @@ router.delete('/:id', bookController.deleteBook);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Book'
+ *             example:
+ *               title: "Dom Quixote"
+ *               author: "Miguel de Cervantes"
+ *               categories: ["Ficção Científica", "Literatura Clássica"]
+ *               borrowedBy: "64f1b2c8e4b0f5a3d8e7f1a3"
+ *               isAvailable: false
  *       400:
  *         description: Livro já emprestado ou usuário não encontrado.
  *         content:
@@ -289,7 +342,7 @@ router.delete('/:id', bookController.deleteBook);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post('/:id/borrow', bookController.borrowBook);
+router.post('/:id/borrow', Auth, bookController.borrowBook);
 
 /**
  * @swagger
@@ -299,6 +352,8 @@ router.post('/:id/borrow', bookController.borrowBook);
  *       - Livros
  *     summary: Devolve um livro
  *     description: Devolve um livro emprestado.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -313,6 +368,12 @@ router.post('/:id/borrow', bookController.borrowBook);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Book'
+ *             example:
+ *               title: "Dom Quixote"
+ *               author: "Miguel de Cervantes"
+ *               categories: ["Ficção Científica", "Literatura Clássica"]
+ *               borrowedBy: null
+ *               isAvailable: true
  *       400:
  *         description: Livro não está emprestado.
  *         content:
@@ -336,6 +397,6 @@ router.post('/:id/borrow', bookController.borrowBook);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post('/:id/return', bookController.returnBook);
+router.post('/:id/return', Auth, bookController.returnBook);
 
 module.exports = router;
