@@ -1,6 +1,23 @@
 const Book = require('../models/BookModel');
 const User = require('../models/UserModel');
+const Category = require('../models/CategoryModel'); 
 const mongoose = require('mongoose');
+
+
+const validateCategories = async (categories) => {
+  if (!categories || !Array.isArray(categories)) {
+    throw new Error('A lista de categorias é inválida.');
+  }
+
+
+  const existingCategories = await Category.find({ name: { $in: categories } });
+  if (existingCategories.length !== categories.length) {
+    const missingCategories = categories.filter(
+      (cat) => !existingCategories.some((ec) => ec.name === cat)
+    );
+    throw new Error(`As seguintes categorias não existem: ${missingCategories.join(', ')}`);
+  }
+};
 
 
 exports.createBook = async (req, res) => {
@@ -10,32 +27,32 @@ exports.createBook = async (req, res) => {
   try {
     const { title, author, categories } = req.body;
 
-    for (const categoryId of categories) {
-      const categoryExists = await mongoose.model('Category').exists({ _id: categoryId }).session(session);
-      if (!categoryExists) {
-        await session.abortTransaction();
-        session.endSession();
-        return res.status(400).json({ error: `Categoria com ID ${categoryId} não encontrada.` });
-      }
-    }
+
+    await validateCategories(categories);
 
 
     const book = new Book({ title, author, categories });
     await book.save({ session });
+
+
+    await Category.updateMany(
+      { name: { $in: categories } },
+      { $push: { books: book._id } },
+      { session }
+    );
 
     await session.commitTransaction();
     session.endSession();
 
     res.status(201).json(book);
   } catch (error) {
-
     await session.abortTransaction();
     session.endSession();
 
     if (error.code === 11000) {
       res.status(400).json({ error: 'Este livro já existe.' });
     } else {
-      res.status(500).json({ error: 'Erro ao criar livro.' });
+      res.status(400).json({ error: error.message });
     }
   }
 };
@@ -43,16 +60,17 @@ exports.createBook = async (req, res) => {
 
 exports.getAllBooks = async (req, res) => {
   try {
-    const books = await Book.find().populate('categories', 'name').populate('borrowedBy', 'name email');
+    const books = await Book.find();
     res.status(200).json(books);
   } catch (error) {
     res.status(500).json({ error: 'Erro ao buscar livros.' });
   }
 };
 
+
 exports.getBookById = async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id).populate('categories', 'name').populate('borrowedBy', 'name email');
+    const book = await Book.findById(req.params.id);
     if (!book) {
       return res.status(404).json({ error: 'Livro não encontrado.' });
     }
@@ -61,7 +79,6 @@ exports.getBookById = async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar livro.' });
   }
 };
-
 
 exports.updateBook = async (req, res) => {
   const session = await mongoose.startSession();
@@ -78,20 +95,25 @@ exports.updateBook = async (req, res) => {
     }
 
     if (categories) {
-      for (const categoryId of categories) {
-        const categoryExists = await mongoose.model('Category').exists({ _id: categoryId }).session(session);
-        if (!categoryExists) {
-          await session.abortTransaction();
-          session.endSession();
-          return res.status(400).json({ error: `Categoria com ID ${categoryId} não encontrada.` });
-        }
-      }
+      await validateCategories(categories);
     }
+
+    await Category.updateMany(
+      { name: { $in: book.categories } },
+      { $pull: { books: book._id } },
+      { session }
+    );
 
     book.title = title || book.title;
     book.author = author || book.author;
     book.categories = categories || book.categories;
     await book.save({ session });
+
+    await Category.updateMany(
+      { name: { $in: book.categories } },
+      { $push: { books: book._id } },
+      { session }
+    );
 
     await session.commitTransaction();
     session.endSession();
@@ -100,10 +122,9 @@ exports.updateBook = async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
     session.endSession();
-    res.status(500).json({ error: 'Erro ao atualizar livro.' });
+    res.status(400).json({ error: error.message });
   }
 };
-
 
 exports.deleteBook = async (req, res) => {
   const session = await mongoose.startSession();
@@ -117,6 +138,12 @@ exports.deleteBook = async (req, res) => {
       return res.status(404).json({ error: 'Livro não encontrado.' });
     }
 
+    await Category.updateMany(
+      { name: { $in: book.categories } },
+      { $pull: { books: book._id } },
+      { session }
+    );
+
     await session.commitTransaction();
     session.endSession();
 
@@ -127,6 +154,7 @@ exports.deleteBook = async (req, res) => {
     res.status(500).json({ error: 'Erro ao excluir livro.' });
   }
 };
+
 
 exports.borrowBook = async (req, res) => {
   const session = await mongoose.startSession();
@@ -203,11 +231,9 @@ exports.returnBook = async (req, res) => {
     );
     await user.save({ session });
 
-
     book.borrowedBy = null;
     book.isAvailable = true;
     await book.save({ session });
-
 
     await session.commitTransaction();
     session.endSession();

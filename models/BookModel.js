@@ -18,8 +18,7 @@ const bookSchema = new mongoose.Schema({
     match: /^[A-Za-zÀ-ÖØ-öø-ÿ\s'-]+$/, 
   },
   categories: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'CategoryModel', 
+    type: String,
     required: true,
   }],
   borrowedBy: {

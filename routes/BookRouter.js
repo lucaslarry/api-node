@@ -32,8 +32,8 @@ const router = express.Router();
  *           type: array
  *           items:
  *             type: string
- *           description: Lista de IDs das categorias do livro.
- *           example: ["64f1b2c8e4b0f5a3d8e7f1a2"]
+ *           description: Lista de nomes das categorias do livro.
+ *           example: ["Ficção Científica", "Literatura Clássica"]
  *         borrowedBy:
  *           type: string
  *           description: ID do usuário que emprestou o livro (opcional).
@@ -61,7 +61,7 @@ const router = express.Router();
  *           example:
  *             title: "Dom Quixote"
  *             author: "Miguel de Cervantes"
- *             categories: ["64f1b2c8e4b0f5a3d8e7f1a2"]
+ *             categories: ["Ficção Científica", "Literatura Clássica"]
  *     responses:
  *       201:
  *         description: Livro criado com sucesso.
@@ -78,7 +78,7 @@ const router = express.Router();
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Categoria com ID 64f1b2c8e4b0f5a3d8e7f1a2 não encontrada."
+ *                   example: "As seguintes categorias não existem: Ficção Científica."
  *       500:
  *         description: Erro interno no servidor.
  */
@@ -167,7 +167,7 @@ router.get('/:id', bookController.getBookById);
  *           example:
  *             title: "Dom Quixote"
  *             author: "Miguel de Cervantes"
- *             categories: ["64f1b2c8e4b0f5a3d8e7f1a2"]
+ *             categories: ["Ficção Científica", "Literatura Clássica"]
  *     responses:
  *       200:
  *         description: Livro atualizado com sucesso.
@@ -184,7 +184,7 @@ router.get('/:id', bookController.getBookById);
  *               properties:
  *                 error:
  *                   type: string
- *                   example: "Categoria com ID 64f1b2c8e4b0f5a3d8e7f1a2 não encontrada."
+ *                   example: "As seguintes categorias não existem: Ficção Científica."
  *       404:
  *         description: Livro não encontrado.
  *         content:
