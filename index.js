@@ -7,6 +7,7 @@ const swaggerJsdoc = require('swagger-jsdoc');
 const userRouter = require('./routes/UserRouter');
 const db = require('./db/database.js');
 const profileRouter = require('./routes/ProfileRouter');
+const bookRouter = require('./routes/BookRouter');
 
 db.connect();
 const app = express();
@@ -48,6 +49,7 @@ const specs = swaggerJsdoc(options);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 app.use('/users', userRouter);
 app.use('/profiles', profileRouter);
+app.use('/books', bookRouter);
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
