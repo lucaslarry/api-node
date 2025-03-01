@@ -1,17 +1,16 @@
 const express = require('express');
 const categoryController = require('../controllers/CategoryController');
 const router = express.Router();
-
-/**
- * @swagger
- * tags:
- *   name: Categorias
- *   description: Gerenciamento de categorias
- */
+const Auth = require('../middlewares/auth');
 
 /**
  * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Category:
  *       type: object
@@ -20,7 +19,7 @@ const router = express.Router();
  *       properties:
  *         name:
  *           type: string
- *           description: Nome da categoria.
+ *           description: Nome da categoria (2 a 50 caracteres, apenas letras, hífens e espaços).
  *           example: "Ficção Científica"
  *         books:
  *           type: array
@@ -32,12 +31,21 @@ const router = express.Router();
 
 /**
  * @swagger
+ * tags:
+ *   name: Categorias
+ *   description: Gerenciamento de categorias
+ */
+
+/**
+ * @swagger
  * /categories:
  *   post:
  *     tags:
  *       - Categorias
  *     summary: Cria uma nova categoria
  *     description: Cria uma nova categoria com nome.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -53,6 +61,9 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               name: "Ficção Científica"
+ *               books: []
  *       400:
  *         description: Erro de validação ou categoria já existe.
  *         content:
@@ -66,7 +77,7 @@ const router = express.Router();
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post('/', categoryController.createCategory);
+router.post('/', Auth, categoryController.createCategory);
 
 /**
  * @swagger
@@ -76,6 +87,8 @@ router.post('/', categoryController.createCategory);
  *       - Categorias
  *     summary: Lista todas as categorias
  *     description: Retorna uma lista de todas as categorias.
+ *     security:
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de categorias.
@@ -85,10 +98,15 @@ router.post('/', categoryController.createCategory);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/Category'
+ *             example:
+ *               - name: "Ficção Científica"
+ *                 books: ["64f1b2c8e4b0f5a3d8e7f1a2"]
+ *               - name: "Literatura Clássica"
+ *                 books: []
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/', categoryController.getAllCategories);
+router.get('/', Auth, categoryController.getAllCategories);
 
 /**
  * @swagger
@@ -98,6 +116,8 @@ router.get('/', categoryController.getAllCategories);
  *       - Categorias
  *     summary: Obtém uma categoria por ID
  *     description: Retorna os detalhes de uma categoria específica.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -112,6 +132,9 @@ router.get('/', categoryController.getAllCategories);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               name: "Ficção Científica"
+ *               books: ["64f1b2c8e4b0f5a3d8e7f1a2"]
  *       404:
  *         description: Categoria não encontrada.
  *         content:
@@ -125,7 +148,7 @@ router.get('/', categoryController.getAllCategories);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/:id', categoryController.getCategoryById);
+router.get('/:id', Auth, categoryController.getCategoryById);
 
 /**
  * @swagger
@@ -135,6 +158,8 @@ router.get('/:id', categoryController.getCategoryById);
  *       - Categorias
  *     summary: Atualiza uma categoria
  *     description: Atualiza os dados de uma categoria existente.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -157,6 +182,9 @@ router.get('/:id', categoryController.getCategoryById);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Category'
+ *             example:
+ *               name: "Ficção Científica e Fantasia"
+ *               books: ["64f1b2c8e4b0f5a3d8e7f1a2"]
  *       400:
  *         description: Erro de validação ou categoria já existe.
  *         content:
@@ -180,7 +208,7 @@ router.get('/:id', categoryController.getCategoryById);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.put('/:id', categoryController.updateCategory);
+router.put('/:id', Auth, categoryController.updateCategory);
 
 /**
  * @swagger
@@ -190,6 +218,8 @@ router.put('/:id', categoryController.updateCategory);
  *       - Categorias
  *     summary: Exclui uma categoria
  *     description: Exclui uma categoria existente.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -213,6 +243,6 @@ router.put('/:id', categoryController.updateCategory);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.delete('/:id', categoryController.deleteCategory);
+router.delete('/:id', Auth, categoryController.deleteCategory);
 
 module.exports = router;

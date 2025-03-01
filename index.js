@@ -9,6 +9,7 @@ const db = require('./db/database.js');
 const profileRouter = require('./routes/ProfileRouter');
 const bookRouter = require('./routes/BookRouter');
 const categoryRouter = require('./routes/CategoryRouter');
+const authRouter = require('./routes/AuthRouter');
 
 db.connect();
 const app = express();
@@ -52,6 +53,7 @@ app.use('/users', userRouter);
 app.use('/profiles', profileRouter);
 app.use('/books', bookRouter);
 app.use('/categories', categoryRouter);
+app.use('/auth', authRouter);
 
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);

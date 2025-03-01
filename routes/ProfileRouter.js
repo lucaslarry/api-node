@@ -1,18 +1,17 @@
 const express = require('express');
 const ProfileController = require('../controllers/ProfileController.js');
+const Auth = require('../middlewares/auth');
 
 const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Perfis
- *   description: Gerenciamento de perfis de usuários
- */
-
-/**
- * @swagger
  * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: http
+ *       scheme: bearer
+ *       bearerFormat: JWT
  *   schemas:
  *     Profile:
  *       type: object
@@ -31,6 +30,23 @@ const router = express.Router();
  *           type: string
  *           description: URL da foto de perfil do usuário.
  *           example: "default-profile.jpg"
+ *         createdAt:
+ *           type: string
+ *           format: date-time
+ *           description: Data de criação do perfil.
+ *           example: "2023-09-01T12:00:00.000Z"
+ *         updatedAt:
+ *           type: string
+ *           format: date-time
+ *           description: Data da última atualização do perfil.
+ *           example: "2023-09-01T12:00:00.000Z"
+ */
+
+/**
+ * @swagger
+ * tags:
+ *   name: Perfis
+ *   description: Gerenciamento de perfis de usuários
  */
 
 /**
@@ -41,6 +57,8 @@ const router = express.Router();
  *       - Perfis
  *     summary: Cria um novo perfil
  *     description: Cria um novo perfil para um usuário existente.
+ *     security:
+ *       - bearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -58,6 +76,12 @@ const router = express.Router();
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Profile'
+ *             example:
+ *               user: "64f1b2c8e4b0f5a3d8e7f1a2"
+ *               bio: "Apaixonado por tecnologia e desenvolvimento."
+ *               profilePicture: "default-profile.jpg"
+ *               createdAt: "2023-09-01T12:00:00.000Z"
+ *               updatedAt: "2023-09-01T12:00:00.000Z"
  *       400:
  *         description: Erro de validação ou usuário já possui um perfil.
  *         content:
@@ -81,7 +105,7 @@ const router = express.Router();
  *       500:
  *         description: Erro interno no servidor.
  */
-router.post('/', ProfileController.createProfile);
+router.post('/', Auth, ProfileController.createProfile);
 
 /**
  * @swagger
@@ -91,6 +115,8 @@ router.post('/', ProfileController.createProfile);
  *       - Perfis
  *     summary: Obtém um perfil por ID do usuário
  *     description: Retorna os detalhes de um perfil específico.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -105,6 +131,12 @@ router.post('/', ProfileController.createProfile);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Profile'
+ *             example:
+ *               user: "64f1b2c8e4b0f5a3d8e7f1a2"
+ *               bio: "Apaixonado por tecnologia e desenvolvimento."
+ *               profilePicture: "default-profile.jpg"
+ *               createdAt: "2023-09-01T12:00:00.000Z"
+ *               updatedAt: "2023-09-01T12:00:00.000Z"
  *       404:
  *         description: Perfil não encontrado.
  *         content:
@@ -118,7 +150,7 @@ router.post('/', ProfileController.createProfile);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.get('/:userId', ProfileController.getProfileByUserId);
+router.get('/:userId', Auth, ProfileController.getProfileByUserId);
 
 /**
  * @swagger
@@ -128,6 +160,8 @@ router.get('/:userId', ProfileController.getProfileByUserId);
  *       - Perfis
  *     summary: Atualiza um perfil
  *     description: Atualiza os dados de um perfil existente.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -151,6 +185,12 @@ router.get('/:userId', ProfileController.getProfileByUserId);
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Profile'
+ *             example:
+ *               user: "64f1b2c8e4b0f5a3d8e7f1a2"
+ *               bio: "Apaixonado por tecnologia, desenvolvimento e livros."
+ *               profilePicture: "new-profile.jpg"
+ *               createdAt: "2023-09-01T12:00:00.000Z"
+ *               updatedAt: "2023-09-01T12:30:00.000Z"
  *       400:
  *         description: Erro de validação.
  *         content:
@@ -174,7 +214,7 @@ router.get('/:userId', ProfileController.getProfileByUserId);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.put('/:userId', ProfileController.updateProfile);
+router.put('/:userId', Auth, ProfileController.updateProfile);
 
 /**
  * @swagger
@@ -184,6 +224,8 @@ router.put('/:userId', ProfileController.updateProfile);
  *       - Perfis
  *     summary: Exclui um perfil
  *     description: Exclui um perfil existente e remove a referência no usuário associado.
+ *     security:
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: userId
@@ -207,6 +249,6 @@ router.put('/:userId', ProfileController.updateProfile);
  *       500:
  *         description: Erro interno no servidor.
  */
-router.delete('/:userId', ProfileController.deleteProfile);
+router.delete('/:userId', Auth, ProfileController.deleteProfile);
 
 module.exports = router;
