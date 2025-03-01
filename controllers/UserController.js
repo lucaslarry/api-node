@@ -1,41 +1,40 @@
+const ProfileModel = require('../models/ProfileModel');
 const User = require('../models/UserModel');
 
 exports.createUser = async (req, res) => {
   try {
-    const { name, email, profile } = req.body;
-
-    if (!name) {
-      return res.status(400).json({ error: 'Nome é um campo obrigatório.' });
-    }
-    if (!email) {
-      return res.status(400).json({ error: 'Email é um campo obrigatório.' });
-    }
-    if (!profile) {
-      return res.status(400).json({ error: 'Perfil é um campo obrigatório.' });
-    }
-    if (name.length < 2 || name.length > 50) {
-      return res.status(400).json({ error: 'Nome deve conter entre 2 e 50 caracteres.' });
-    }
-    if (!/^[A-Za-z\s]+$/.test(name)) {
-      return res.status(400).json({ error: 'Nome deve conter apenas letras e espaços.' });
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: 'Email inválido.' });
-    }
-
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email já está em uso.' });
-    }
+    const { name, email, bio, profilePicture } = req.body;
 
 
-    const user = new User(req.body);
+    if (!name || !email) {
+      return res.status(400).json({ error: 'Nome e email são obrigatórios.' });
+    }
+    
+    const user = new User({ name, email });
     await user.save();
+
+
+    const profile = new ProfileModel({
+      user: user._id,
+      bio: bio || '', 
+      profilePicture: profilePicture || 'default-profile.jpg', 
+    });
+    await profile.save();
+
+
+    user.profile = profile._id;
+    await user.save();
+
     res.status(201).json(user);
   } catch (error) {
-    res.status(500).json({ error: 'Erro ao criar usuário.' });
+    if (error.code === 11000) {
+      res.status(400).json({ error: 'Email já está em uso.' });
+    } else {
+      res.status(500).json({ error: 'Erro ao criar usuário.' });
+    }
   }
 };
+
 
 
 exports.getUsers = async (req, res) => {
@@ -105,6 +104,7 @@ exports.deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'Usuário não encontrado.' });
     }
+    await ProfileModel.findOneAndDelete({ user: req.params.id });
     res.status(204).send(); 
   } catch (error) {
     res.status(500).json({ error: 'Erro ao excluir usuário.' });

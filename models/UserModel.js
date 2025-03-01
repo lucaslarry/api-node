@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    match: /^[A-Za-z\s]+$/,
+    match: /^[A-Za-zÀ-ÖØ-öø-ÿ\s]+$/, 
     minlength: 2,
     maxlength: 50,
   },
@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema({
   },
   profile: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Profile',
+    ref: 'ProfileModel',
   },
   borrowedBooks: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -29,4 +29,4 @@ const userSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('UserModel', userSchema);
