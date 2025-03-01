@@ -1,5 +1,5 @@
 const express = require('express');
-const UserController = require('../controllers/UserController');
+const UserController = require('../controllers/UserController.js');
 
 const router = express.Router();
 
@@ -19,11 +19,7 @@ const router = express.Router();
  *       required:
  *         - name
  *         - email
- *         - profile
  *       properties:
- *         _id:
- *           type: string
- *           description: ID gerado automaticamente pelo MongoDB.
  *         name:
  *           type: string
  *           description: Nome do usuário (2-50 caracteres, apenas letras e espaços).
@@ -32,23 +28,14 @@ const router = express.Router();
  *           type: string
  *           description: Email do usuário (deve ser único e válido).
  *           example: "joao.silva@example.com"
- *         profile:
+ *         bio:
  *           type: string
- *           description: ID do perfil associado ao usuário.
- *           example: "64f1b2c8e4b0f5a3d8e7f1a2"
- *         borrowedBooks:
- *           type: array
- *           items:
- *             type: string
- *           description: Lista de IDs dos livros emprestados pelo usuário.
- *         createdAt:
+ *           description: Biografia do usuário (opcional, máximo 500 caracteres).
+ *           example: "Amante de livros clássicos."
+ *         profilePicture:
  *           type: string
- *           format: date-time
- *           description: Data de criação do usuário.
- *         updatedAt:
- *           type: string
- *           format: date-time
- *           description: Data da última atualização do usuário.
+ *           description: URL da foto de perfil (opcional).
+ *           example: "https://example.com/profile.jpg"
  */
 
 /**
@@ -58,13 +45,18 @@ const router = express.Router();
  *     tags:
  *       - Usuários
  *     summary: Cria um novo usuário
- *     description: Cria um novo usuário com nome, email e perfil.
+ *     description: Cria um novo usuário com nome, email e, opcionalmente, biografia e foto de perfil. Um perfil é criado automaticamente.
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/User'
+ *           example:
+ *             name: "João Silva"
+ *             email: "joao.silva@example.com"
+ *             bio: "Amante de livros clássicos."
+ *             profilePicture: "https://example.com/profile.jpg"
  *     responses:
  *       201:
  *         description: Usuário criado com sucesso.
@@ -167,6 +159,11 @@ router.get('/:id', UserController.getUserById);
  *         application/json:
  *           schema:
  *             $ref: '#/components/schemas/User'
+ *           example:
+ *             name: "João Silva"
+ *             email: "joao.silva@example.com"
+ *             bio: "Amante de livros clássicos."
+ *             profilePicture: "https://example.com/profile.jpg"
  *     responses:
  *       200:
  *         description: Usuário atualizado com sucesso.
@@ -206,7 +203,7 @@ router.put('/:id', UserController.updateUser);
  *     tags:
  *       - Usuários
  *     summary: Exclui um usuário
- *     description: Exclui um usuário existente.
+ *     description: Exclui um usuário existente e seu perfil associado.
  *     parameters:
  *       - in: path
  *         name: id
