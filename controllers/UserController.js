@@ -27,8 +27,6 @@ exports.createUser = async (req, res) => {
   } catch (error) {
     if (error.code === 11000) {
       res.status(400).json({ error: 'Email já está em uso.' });
-    } else {
-      res.status(500).json({ error: 'Erro ao criar usuário.' });
     }
   }
 };

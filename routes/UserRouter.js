@@ -39,56 +39,6 @@ const router = express.Router();
  *           example: "2023-09-01T12:00:00.000Z"
  */
 
-/**
- * @swagger
- * tags:
- *   name: Usuários
- *   description: Gerenciamento de usuários
- */
-
-/**
- * @swagger
- * /users:
- *   post:
- *     tags:
- *       - Usuários
- *     summary: Cria um novo usuário
- *     description: Cria um novo usuário com nome, email e senha.
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/User'
- *           example:
- *             name: "João Silva"
- *             email: "joao.silva@example.com"
- *             password: "senha123"
- *     responses:
- *       201:
- *         description: Usuário criado com sucesso.
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/User'
- *             example:
- *               name: "João Silva"
- *               email: "joao.silva@example.com"
- *               created_at: "2023-09-01T12:00:00.000Z"
- *       400:
- *         description: Erro de validação ou email já em uso.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 error:
- *                   type: string
- *                   example: "Email já está em uso."
- *       500:
- *         description: Erro interno no servidor.
- */
-router.post('/', UserController.createUser);
 
 /**
  * @swagger

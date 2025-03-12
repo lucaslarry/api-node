@@ -5,16 +5,6 @@ require('dotenv').config();
 
 const secret = process.env.JWT_SECRET;
 
-const register = async (req, res) => {
-    const { name, email, password } = req.body;
-
-    try {
-        userController.createUser({ name, email, password });
-        res.status(201).json(user);
-    } catch (error) {
-        res.status(500).json({ error: 'Erro ao registrar usuário.' });
-    }
-};
 
 const login = async (req, res) => {
     const { email, password } = req.body;
@@ -43,5 +33,4 @@ const login = async (req, res) => {
 
 module.exports = {
     login,
-    register,
 };
