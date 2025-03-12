@@ -1,47 +1,49 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/UserModel'); 
-const userController = require('./UserController');
+const UserModel = require('../models/UserModel');
 require('dotenv').config();
 
 const secret = process.env.JWT_SECRET;
 
-const register = async (req, res) => {
-    const { name, email, password } = req.body;
-
+class AuthController {
+  static async register({ name, email, password }) {
     try {
-        userController.createUser({ name, email, password });
-        res.status(201).json(user);
+      const existingUser = await UserModel.findOne({ email });
+      if (existingUser) {
+        throw new Error('Este e-mail já está em uso.');
+      }
+
+      const user = new UserModel({ name, email, password });
+      await user.save();
+      return user;
     } catch (error) {
-        res.status(500).json({ error: 'Erro ao registrar usuário.' });
+      throw new Error('Erro ao registrar usuário: ' + error.message);
     }
-};
+  }
 
-const login = async (req, res) => {
-    const { email, password } = req.body;
-
+  static async login({ email, password }) {
     try {
- 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
-        }
+      const user = await UserModel.findOne({ email });
+      if (!user) {
+        throw new Error('E-mail ou senha incorretos.');
+      }
 
-
+      const isCorrectPassword = await new Promise((resolve, reject) => {
         user.isCorrectPassword(password, (err, same) => {
-            if (err || !same) {
-                return res.status(401).json({ error: 'E-mail ou senha incorretos.' });
-            }
-
-
-            const token = jwt.sign({ email }, secret, { expiresIn: '1d' });
-            res.status(200).json({ user, token });
+          if (err) reject(err);
+          resolve(same);
         });
-    } catch (error) {
-        res.status(500).json({ error: 'Erro interno, tente novamente.' });
-    }
-};
+      });
 
-module.exports = {
-    login,
-    register,
-};
+      if (!isCorrectPassword) {
+        throw new Error('E-mail ou senha incorretos.');
+      }
+
+      const token = jwt.sign({ email }, secret, { expiresIn: '1d' });
+      return { user, token };
+    } catch (error) {
+      throw new Error('Erro interno, tente novamente: ' + error.message);
+    }
+  }
+}
+
+module.exports = AuthController;

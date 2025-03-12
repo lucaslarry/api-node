@@ -1,60 +1,34 @@
-const express = require('express');
+const { ApolloServer } = require('apollo-server');
+const { readFileSync } = require('fs');
+const { join } = require('path');
+const mongoose = require('mongoose');
 require('dotenv').config();
-const bodyParser = require('body-parser');
-const cors = require('cors'); 
-const swaggerUi = require('swagger-ui-express');
-const swaggerJsdoc = require('swagger-jsdoc');
-const userRouter = require('./routes/UserRouter');
-const db = require('./db/database.js');
-const profileRouter = require('./routes/ProfileRouter');
-const bookRouter = require('./routes/BookRouter');
-const categoryRouter = require('./routes/CategoryRouter');
-const authRouter = require('./routes/AuthRouter');
 
-db.connect();
-const app = express();
-const port = process.env.PORT || 3000;
+const typeDefs = readFileSync(join(__dirname, 'graphql', 'schema.graphql'), 'utf-8');
+
+const resolvers = require('./graphql/resolvers');
+const context = require('./graphql/context');
+
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('Conectado ao MongoDB');
+});
+
+mongoose.connection.on('error', (err) => {
+  console.error('Erro na conexão com o MongoDB:', err);
+});
 
 
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-  }));
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  context,
+});
 
-app.use(bodyParser.json());
-
-const options = {
-  definition: {
-    openapi: '3.0.0',
-    info: {
-      title: 'Minha API Node',
-      version: '1.0.0',
-      description: 'Documentação da minha API Node',
-    },tags: [
-      {
-        name: 'Usuários',
-        description: 'Operações relacionadas a usuários',
-      },
-    ],
-    servers: [
-      {
-        url: process.env.CORS_ORIGI,
-      },
-    ],
-  },
-  apis: ['./routes/*.js'], 
-};
-
-const specs = swaggerJsdoc(options);
-
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
-app.use('/users', userRouter);
-app.use('/profiles', profileRouter);
-app.use('/books', bookRouter);
-app.use('/categories', categoryRouter);
-app.use('/auth', authRouter);
-
-app.listen(port, () => {
-  console.log(`Servidor rodando em http://localhost:${port}`);
+server.listen({ port: process.env.PORT || 4000 }).then(({ url }) => {
+  console.log(`🚀 Servidor GraphQL rodando em ${url}`);
 });
