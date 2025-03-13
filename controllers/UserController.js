@@ -59,13 +59,13 @@ class UserController {
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
       throw new Error('400: ID inválido');
     }
-
+  
     const deletedUser = await UserModel.findByIdAndDelete(id);
     if (!deletedUser) {
       throw new Error('404: Usuário não encontrado');
     }
-
-    return { message: 'Usuário deletado com sucesso' };
+  
+    return deletedUser; 
   }
 }
 
