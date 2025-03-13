@@ -12,9 +12,13 @@ type AuthPayload {
 
 type Query {
   me: User
+  users: [User]
+  user(id: ID!): User
 }
 
 type Mutation {
   register(name: String!, email: String!, password: String!): User
   login(email: String!, password: String!): AuthPayload
+  updateUser(id: ID!, name: String, email: String, password: String): User
+  deleteUser(id: ID!): User
 }
